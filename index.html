@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalp Animasyonu</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            margin: 0;
+        }
+        .heart {
+            width: 200px;
+            cursor: pointer;
+            transition: transform 0.5s;
+        }
+        .beat {
+            animation: beat 0.2s infinite alternate;
+        }
+        @keyframes beat {
+            to {
+                transform: scale(1.2);
+            }
+        }
+        .rotate {
+            transition: transform 1s;
+        }
+        #text {
+            font-size: 24px;
+            margin-top: 20px;
+            font-family: Arial, sans-serif;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <img src="kalp.png" alt="Kalp" class="heart" id="heart">
+    <div id="text"></div> 
+
+
+
+    <script>
+        const heart = document.getElementById('heart');
+        const textElement = document.getElementById('text');
+        let clickCount = 0;
+
+        function typeText(text, callback) {
+            textElement.textContent = ""; // Clear previous text
+            let index = 0;
+            const interval = setInterval(() => {
+                textElement.textContent += text[index];
+                index++;
+                if (index === text.length) {
+                    clearInterval(interval);
+                    setTimeout(() => deleteText(callback), 1000); // Wait 1s, then delete text
+                }
+            }, 200); // Type each letter every 200ms
+        }
+
+        function deleteText(callback) {
+            let length = textElement.textContent.length;
+            const interval = setInterval(() => {
+                textElement.textContent = textElement.textContent.slice(0, --length);
+                if (length === 0) {
+                    clearInterval(interval);
+                    callback(); // Callback after deletion
+                }
+            }, 200); // Delete each letter every 200ms
+        }
+
+        heart.addEventListener('click', () => {
+            clickCount++;
+            if (clickCount === 1) {
+                heart.classList.add('beat');
+                setTimeout(() => {
+                    heart.classList.remove('beat');
+                }, 1000); // Remove animation after 1s
+            } else if (clickCount === 2) {
+                heart.classList.add('rotate');
+                heart.style.transform = 'rotate(270deg)';
+                setTimeout(() => {
+                    heart.classList.remove('rotate');
+                    heart.style.transform = 'none';
+                    clickCount = 0; // Reset click count
+                }, 1000); // Remove animation after 1s
+                typeText("I think you are very cute fatmanur", () => {
+                    console.log("Text animation completed");
+                });
+            }
+        });
+    </script>
+</body>
+</html>
