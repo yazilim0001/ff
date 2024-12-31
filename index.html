@@ -91,7 +91,7 @@
         // Kalp oluşturma fonksiyonu
         function createHeart() {
             const size = Math.random() * 40 + 10; // Kalp boyutu rastgele küçük ve büyük
-            const x = (Math.random() - 0.2) * canvas.width + canvas.width * 0.4; // Sağ tarafa daha yakın
+            const x = Math.random() * (canvas.width * 0.5) + (canvas.width * 0.5); // Sağ tarafa daha yakın
             const y = Math.random() * (canvas.height / 2) + (canvas.height / 4); // Yükseklik, ekranın ortasına yakın
             const speedX = (Math.random() - 0.5) * 4;
             const speedY = (Math.random() - 0.5) * 2;
@@ -169,7 +169,7 @@
 
         // Kalp hareketlerini başlat
         heartImage.onload = () => {
-            const heartCount = window.innerWidth < 480 ? Math.floor(20 * 0.4) : Math.floor(20 * 0.7); // Kalp sayısı %60 azaltıldı
+            const heartCount = window.innerWidth < 480 ? Math.floor(15 * 0.2) : Math.floor(15 * 0.5); // Kalp sayısı %60 azaltıldı
             for (let i = 0; i < heartCount; i++) {
                 createHeart();
             }
