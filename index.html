@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kalp Animasyonu</title>
+    <title>Yılbaşı Hediyesi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
             display: flex;
@@ -13,53 +14,118 @@
             height: 100vh;
             background-color: #f0f0f0;
             margin: 0;
+            overflow: hidden;
+        }
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
         }
         .heart {
-            width: 200px;
+            width: 120px;
             cursor: pointer;
             transition: transform 0.5s;
-        }
-        .beat {
-            animation: beat 0.2s infinite alternate;
-        }
-        @keyframes beat {
-            to {
-                transform: scale(1.2);
-            }
-        }
-        .rotate {
-            transition: transform 1s;
+            z-index: 10;
         }
         #text {
-            font-size: 24px;
+            font-size: 20px;
             margin-top: 20px;
-            font-family: Arial, sans-serif;
-            color: #333;
+            font-family: 'Dancing Script', cursive; /* Romantik Dancing Script fontu */
+            color: #000000;
+            max-width: 90%;
+            text-align: center;
+            z-index: 10;
+            font-weight: bold;
+            padding: 0 30px; /* Sağ ve soldan daha fazla boşluk bırakıldı */
+            box-sizing: border-box; /* Padding nedeniyle genişliği aşmasın diye box-sizing ekledik */
+        }
+
+        /* Responsive styling for larger screens */
+        @media (min-width: 768px) {
+            .heart {
+                width: 150px;
+            }
+            #text {
+                font-size: 20px;
+                max-width: 600px;
+            }
+        }
+        /* Responsive styling for mobile screens */
+        @media (max-width: 480px) {
+            .heart {
+                width: 120px;
+            }
+            #text {
+                font-size: 16px;
+                max-width: 100%; /* Yazı için max-width %100 yapıldı */
+                padding: 0 42px; /* Sağ ve sol padding arttırıldı */
+                margin-top: 15px; /* Üstten biraz boşluk */
+                line-height: 1.6; /* Satır aralığını artırdık */
+            }
         }
     </style>
 </head>
 <body>
+    <canvas id="heartsCanvas"></canvas>
     <img src="kalp.png" alt="Kalp" class="heart" id="heart">
-    <div id="text"></div> 
+    <div id="text"></div>
 
-
-
+    <!-- Canvas Confetti Kütüphanesi -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script>
-        const heart = document.getElementById('heart');
-        const textElement = document.getElementById('text');
-        let clickCount = 0;
+        const canvas = document.getElementById('heartsCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
 
+        const textElement = document.getElementById('text');
+        const heart = document.getElementById('heart');
+        let isAnimatingText = false;
+
+        const hearts = [];
+        const heartImage = new Image();
+        heartImage.src = 'kalp.png'; // Kalp resminizin yolunu buraya yazın
+
+        // Kalp oluşturma fonksiyonu
+        function createHeart() {
+            const size = Math.random() * 40 + 10; // Kalp boyutu rastgele küçük ve büyük
+            const x = (Math.random() - 0.2) * canvas.width + canvas.width * 0.4; // Sağ tarafa daha yakın
+            const y = Math.random() * (canvas.height / 2) + (canvas.height / 4); // Yükseklik, ekranın ortasına yakın
+            const speedX = (Math.random() - 0.5) * 4;
+            const speedY = (Math.random() - 0.5) * 2;
+            hearts.push({ x, y, size, speedX, speedY });
+        }
+
+        // Kalp çizim fonksiyonu
+        function drawHearts() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            hearts.forEach((heart, index) => {
+                heart.x += heart.speedX;
+                heart.y += heart.speedY;
+                if (heart.x < 0 || heart.x > canvas.width || heart.y < 0 || heart.y > canvas.height) {
+                    hearts.splice(index, 1);
+                    createHeart();
+                }
+                ctx.drawImage(heartImage, heart.x, heart.y, heart.size, heart.size);
+            });
+            requestAnimationFrame(drawHearts);
+        }
+
+        // Yazı yazma ve silme fonksiyonları
         function typeText(text, callback) {
-            textElement.textContent = ""; // Clear previous text
+            if (isAnimatingText) return; // Önceki animasyon bitmeden tekrar başlama
+            isAnimatingText = true;
+            textElement.textContent = "";
             let index = 0;
             const interval = setInterval(() => {
                 textElement.textContent += text[index];
                 index++;
                 if (index === text.length) {
                     clearInterval(interval);
-                    setTimeout(() => deleteText(callback), 1000); // Wait 1s, then delete text
+                    setTimeout(() => deleteText(callback), 500);
                 }
-            }, 200); // Type each letter every 200ms
+            }, 50);
         }
 
         function deleteText(callback) {
@@ -68,31 +134,46 @@
                 textElement.textContent = textElement.textContent.slice(0, --length);
                 if (length === 0) {
                     clearInterval(interval);
-                    callback(); // Callback after deletion
+                    isAnimatingText = false;
+                    callback();
                 }
-            }, 200); // Delete each letter every 200ms
+            }, 50);
         }
 
+        // Kalp ve yazı ile etkileşim
         heart.addEventListener('click', () => {
-            clickCount++;
-            if (clickCount === 1) {
-                heart.classList.add('beat');
-                setTimeout(() => {
-                    heart.classList.remove('beat');
-                }, 1000); // Remove animation after 1s
-            } else if (clickCount === 2) {
-                heart.classList.add('rotate');
-                heart.style.transform = 'rotate(270deg)';
-                setTimeout(() => {
-                    heart.classList.remove('rotate');
-                    heart.style.transform = 'none';
-                    clickCount = 0; // Reset click count
-                }, 1000); // Remove animation after 1s
-                typeText("I think you are very cute fatmanur", () => {
-                    console.log("Text animation completed");
-                });
-            }
+            heart.classList.add('beat');
+            heart.classList.add('rotate');
+            heart.style.transform = 'rotate(270deg)';
+            setTimeout(() => {
+                heart.classList.remove('beat');
+                heart.classList.remove('rotate');
+                heart.style.transform = 'none';
+            }, 500);
+
+            typeText("Yeni yılın kutlu olsun! Başarı ve mutluluk hep seninle olsun. Hayallerini gerçekleştirmen dileğiyle. I am sending you my love. 💖", () => {
+                console.log("Text animation completed");
+            });
+            launchConfetti(); // Her tıklamada konfeti patlat
         });
+
+        // Konfeti patlatma fonksiyonu
+        function launchConfetti() {
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 } // Konfeti başlangıç yüksekliği
+            });
+        }
+
+        // Kalp hareketlerini başlat
+        heartImage.onload = () => {
+            const heartCount = window.innerWidth < 480 ? Math.floor(40 * 1.3) : Math.floor(20 * 1.3); // Ekrana göre %30 artırdık
+            for (let i = 0; i < heartCount; i++) {
+                createHeart();
+            }
+            drawHearts();
+        };
     </script>
 </body>
 </html>
